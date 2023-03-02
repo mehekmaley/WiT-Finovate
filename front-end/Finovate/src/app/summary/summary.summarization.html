@@ -1,0 +1,43 @@
+<div style="text-align: center;">
+  <input type="file" class="file-input"
+  (change)="onFileSelected($event)" #fileUpload>
+
+  <div class="file-upload" style="border-style: dotted;">
+    <button mat-mini-fab color="primary" class="upload-btn"
+    (click)="fileUpload.click()">
+      <mat-icon>attach_file</mat-icon>
+    </button><br>
+    {{fileName || "No file uploaded yet."}}
+  </div>
+  <br>
+  <div *ngIf="showLoader">
+    <mat-spinner class="mat-spinner" ></mat-spinner>
+    <br />
+    Analyzing...
+  </div>
+  
+  <div *ngFor="let summary of summaryFinalList">
+    <br>
+    <mat-card>
+    <mat-card-content>
+      <div [innerHTML]="summary"></div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>
+
+
+   <!-- HTML !-->
+ 
+
+ 
+ <!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->
+ <!-- * * * * * * * * * * * The content above * * * * * * * * * * * -->
+ <!-- * * * * * * * * * * is only a placeholder * * * * * * * * * * -->
+ <!-- * * * * * * * * * * and can be replaced. * * * * * * * * * * * -->
+ <!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->
+ <!-- * * * * * * * * * * End of Placeholder * * * * * * * * * * * -->
+ <!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->
+ 
+
+ 
