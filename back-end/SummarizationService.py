@@ -9,6 +9,8 @@ import fitz
 import openai
 from fpdf import FPDF
 import json
+import pyodbc 
+    
 from azure.storage.blob import BlobServiceClient
 
 # creating the flask app
@@ -21,13 +23,10 @@ UPLOAD_FOLDER = 'E:\gpt3-summarization\FileDB'
 ALLOWED_EXTENSIONS = set(['pdf'])
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-
 storage_account_key = ""
 storage_account_name = ""
 connection_string = ""
 container_name = "fileholder"
-
-
 
 @cross_origin()
 def uploadToBlobStorage(file_path, file_name):
@@ -43,7 +42,7 @@ def uploadToBlobStorage(file_path, file_name):
 def textToPDF(filename,text):
     pdf = FPDF()
     pdf.add_page()
-    text2 = text.encode('latin-1', 'replace').decode('latin-1')
+    text2 = allSummaryText.encode('latin-1', 'replace').decode('latin-1')
     pdf.set_font("Arial", size = 15)
     pdf.write(8, txt=text2)
     pdf.ln(8)
@@ -57,6 +56,7 @@ def pdfToTextUtil(fileName):
     global paperContent
     global summary
     summary = []
+    global allSummaryText
     allSummaryText = ''
     paperContent = ''
     paperContent = fitz.open(filePath)
@@ -90,6 +90,31 @@ def pdfToTextUtil(fileName):
     )
     summary.append(sentimentResponse["choices"][0]["text"])
     return jsonify({'summaryPerPage': 'Passed'})
+
+@cross_origin()
+def insertUserMetadata():
+    try:
+        cnxn = pyodbc.connect('Driver={ODBC Driver 18 for SQL Server};Server=tcp:svre2.database.windows.net,1433;Database=NewDb;Uid=komal;Pwd=Pa55w0rd;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;')
+        cursor = cnxn.cursor()
+        print('Connection established')
+        cursor.execute("insert into userHistory (userId, inputFile, summarizedFile, creationDate) values('123461', 'd:\\abc4.pdf', 'D:\\xyz4.pdf', '02/03/2023')")
+        print('record  inserted')
+        
+        #iterate over records
+        print('Records fetched')
+        cursor.execute("SELECT * FROM userHistory") 
+        row = cursor.fetchone() 
+        while row:
+            print (row) 
+            row = cursor.fetchone()
+
+        cnxn.commit()
+        cursor.close()
+        cnxn.close()
+        print('Done')
+    except:
+        print('Cannot connect to SQL server')
+    return jsonify({'msg': 'response from server'})
 
 
   

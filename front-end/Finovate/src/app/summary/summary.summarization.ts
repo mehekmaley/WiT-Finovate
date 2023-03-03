@@ -12,6 +12,7 @@ import {MatIconModule} from '@angular/material/icon';
   encapsulation: ViewEncapsulation.None
 })
 export class AppSummarizationComponent {
+  isButtonVisible = false;
   size=0;
   fileName = '';
   summaryList: any = [];
@@ -85,7 +86,7 @@ export class AppSummarizationComponent {
           formData.append("file", file);
           //var option = {'Content-Length' : msg.length, 'Content-Type': 'plain/text', 'body' : msg};
 
-          const upload$ = this.http.post("http://192.168.211.65:5000/upload", formData);
+          const upload$ = this.http.post("http://127.0.0.1:5000/upload", formData);
           let map = new Map();  
   
           map.set('cash flow', 'cash flow tooltip');     
@@ -148,12 +149,39 @@ export class AppSummarizationComponent {
 
               index +=1
             })
+            this.isButtonVisible = true;
           }, (error) => {
             console.log("error",error)
           });
       }
 
+  }
+
+  saveHistory() {
+    const formData = new FormData();
   
-}
+            formData.append("user", "priyanka");
+            //formData.append("fileName", this.fileName);
+            //formData.append("summary", this.summaryFinalList.at(0));
+            formData.append("fileName", "filepreimierFoodQuaterlySummary.pdf");
+            let totalSummary = '';
+            let list = ["one", "two", "three"]
+            for (var index in list) {
+              let summary :any = list[index];
+              console.log('summary :' + summary);
+              totalSummary = totalSummary +  "\n" + summary;
+              // summaryFinalList.push(newSummary)
+            }
+            const saveHistory$ = this.http.post("http://127.0.0.1:5000/saveHistory", {
+              "fileName": "premierFoodQuarterlySummary.pdf",
+              "summary": totalSummary
+            });
+            
+            saveHistory$.subscribe((data: any) => {
+              console.log('data', data)
+            }, (error) => {
+              console.log("error",error)
+            });
+  }
 
 }
