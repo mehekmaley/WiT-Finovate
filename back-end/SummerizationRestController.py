@@ -7,67 +7,40 @@ from werkzeug.utils import secure_filename
 import numpy as np
 import fitz
 import openai
-
+from fpdf import FPDF
+import json
+from azure.storage.blob import BlobServiceClient
+from SummarizationService import uploadToBlobStorage, pdfToTextUtil, textToPDF
 # creating the flask app
 app = Flask(__name__)
 cors = CORS(app)
 
 # creating an API object
 api = Api(app)
-UPLOAD_FOLDER = 'C:/Users/mehek/gpt3-summarization/backend-code/FileDB'
+UPLOAD_FOLDER = 'E:\gpt3-summarization\FileDB'
 ALLOWED_EXTENSIONS = set(['pdf'])
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 paperContent = ''
 summary = []
 
-@cross_origin()
-def pdfToTextUtil(fileName):
-    filePath =r"C:\Users\mehek\gpt3-summarization\backend-code\FileDB" +'\\' + fileName 
-    print('def',filePath)
-    global paperContent
-    global summary
-    summary = []
-    allSummaryText = ''
-    paperContent = ''
-    paperContent = fitz.open(filePath)
-    tldr_tag = "\n Tl;dr:"
-    openai.organization = "org-dgNcRwMlJXr3DYN3pet7mjTO"
-    openai.api_key = "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"
-    engine_list = openai.Engine.list() 
-    index = 1  
-    for page in paperContent:
-        text = page.get_text("text") + tldr_tag
-        response = openai.Completion.create(model="text-davinci-003",prompt=text,temperature=0.9,
-            max_tokens=140,
-            top_p=0.9,
-            frequency_penalty=0.0,
-            presence_penalty=1
-            # stop=["\n"]
-        )
-        summary.append(response["choices"][0]["text"])
-        if(index <= 5):
-            allSummaryText += response["choices"][0]["text"]
-        
-        index += 1
 
-    text = "What is the sentiment of given text: "+ allSummaryText+ tldr_tag
-    sentimentResponse = openai.Completion.create(model="text-curie-001",prompt=text,temperature=0.8,
-        max_tokens=140,
-        top_p=0.9,
-        frequency_penalty=0.0,
-        presence_penalty=1
-        # stop=["\n"]
-    )
-    summary.append(sentimentResponse["choices"][0]["text"])
-    return jsonify({'summaryPerPage': 'Passed'})
 
-  
+# creating an API object
+api = Api(app)
+UPLOAD_FOLDER = 'E:\gpt3-summarization\FileDB'
+ALLOWED_EXTENSIONS = set(['pdf'])
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+paperContent = ''
+summary = []
+
+
 # making a class for a particular resource
 # the get, post methods correspond to get and post requests
 # they are automatically mapped by flask_restful.
 # other methods include put, delete, etc.
-class Hello(Resource):
+class SummarizationController(Resource):
   
     # corresponds to the GET request.
     # this function is called whenever there
@@ -83,7 +56,7 @@ class Hello(Resource):
         if request.method == 'POST':
             # check if the post request has the file part
             file = request.files['file']
-            # if user does not select file, browser also
+            # if user does not select f ile, browser also
             # submit an empty part without filename
             if file.filename == '':
                 flash('No selected file')
@@ -95,12 +68,27 @@ class Hello(Resource):
                 print('ans',completeSummary)
                 return jsonify({'summaryOfFile': summary})
         return jsonify({'msg': 'response from server'})
-  
+    
+    @cross_origin()
+    @app.route('/saveHistory', methods=['POST'])
+    def save_history():
+        if request.method == 'POST':
+            print("helloworld")
+            print("data : ", request.get_json())
+            #y = json.loads(request.get_json())
+            filename = request.get_json()["fileName"];
+            summary = request.get_json()["summary"];
+            print("summary : ", summary)
+            print("filename : ", filename)
+            textToPDF(filename,summary)
+            uploadToBlobStorage(filename,filename)
+        return jsonify({'msg': 'response from server'})
+
     def allowed_file(filename):
         return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-api.add_resource(Hello, '/');
+api.add_resource(SummarizationController, '/');
 
 # driver function
 if __name__ == '__main__':
