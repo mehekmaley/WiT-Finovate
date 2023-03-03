@@ -10,7 +10,7 @@ import openai
 from fpdf import FPDF
 import json
 from azure.storage.blob import BlobServiceClient
-from SummarizationService import uploadToBlobStorage, pdfToTextUtil, textToPDF
+from SummarizationService import uploadToBlobStorage, pdfToTextUtil, textToPDF,insertUserMetadata
 # creating the flask app
 app = Flask(__name__)
 cors = CORS(app)
@@ -23,7 +23,6 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 paperContent = ''
 summary = []
-
 
 
 # creating an API object
@@ -82,6 +81,7 @@ class SummarizationController(Resource):
             print("filename : ", filename)
             textToPDF(filename,summary)
             uploadToBlobStorage(filename,filename)
+            insertUserMetadata()
         return jsonify({'msg': 'response from server'})
 
     def allowed_file(filename):
