@@ -13,6 +13,7 @@ import {MatIconModule} from '@angular/material/icon';
 })
 export class AppSummarizationComponent {
   size=0;
+  isButtonVisible = false;
   fileName = '';
   summaryList: any = [];
   showLoader = false;
@@ -85,7 +86,7 @@ export class AppSummarizationComponent {
           formData.append("file", file);
           //var option = {'Content-Length' : msg.length, 'Content-Type': 'plain/text', 'body' : msg};
 
-          const upload$ = this.http.post("http://192.168.211.65:5000/upload", formData);
+          const upload$ = this.http.post("http://127.0.0.1:5000/upload", formData);
           let map = new Map();  
   
           map.set('cash flow', 'cash flow tooltip');     
@@ -129,7 +130,7 @@ export class AppSummarizationComponent {
               this.summaryList[index] = summary.replace('net profit', '<div class="tooltip">net profit<span class="tooltiptext">Tooltip text</span></div>');
               this.summaryList[index] = summary.replace('profit before tax', '<div class="tooltip">profit before tax<span class="tooltiptext">Tooltip text</span></div>');
               this.summaryList[index] = summary.replace('operating profit', '<div class="tooltip">profit before tax<span class="tooltiptext">Tooltip text</span></div>');
-              this.summaryList[index] = summary.replace('EBIT margin', '<div class="tooltip">profit before tax<span class="tooltiptext">Tooltip text</span></div>');
+              // this.summaryList[index] = summary.replace('EBIT margin', '<div class="tooltip">profit before tax<span class="tooltiptext">Tooltip text</span></div>');
               this.summaryList[index] = summary.replace('cash equivalents', '<div class="tooltip">profit before tax<span class="tooltiptext">Tooltip text</span></div>');
               this.summaryList[index] = summary.replace('net income', '<div class="tooltip">profit before tax<span class="tooltiptext">Tooltip text</span></div>');
               this.summaryList[index] = summary.replace('earnings per share', '<div class="tooltip">profit before tax<span class="tooltiptext">Tooltip text</span></div>');
@@ -147,6 +148,7 @@ export class AppSummarizationComponent {
               this.summaryList[index] = summary.replace('operating cash flow', '<div class="tooltip">profit before tax<span class="tooltiptext">Tooltip text</span></div>');
 
               index +=1
+              this.isButtonVisible = true
             })
           }, (error) => {
             console.log("error",error)
